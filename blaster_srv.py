@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
     Copyright (c) 2018, Masaru Natsu (masaru.natsu@gmail.com)
-
+"""
+"""
     https://github.com/Pandachan/blaster.git
-
+"""
+"""
+    License
     this program is free software; you can redistribute it and/or modify
     under the terms of the GNU General Public License as published by
     the Free Sftware Fundation; either version 3 of the License, or
@@ -36,7 +39,7 @@ from queue import Queue
 
 ##
 # Our own logger module.
-form logger import *
+from logger import *
 
 ##
 # Get the file name used for the log and the pipe to share the data
@@ -49,7 +52,7 @@ try:
     myLog = Logger(fileName)
 except Exception as e:
     print(str(e))
-    exit 1
+    sys.exit(1)
 # >>> End of try
 
 class myFifo(object):
@@ -57,7 +60,8 @@ class myFifo(object):
         This class will create and manage the Piped Fifo for the incoming data
     """
     def __init__(self, fifoFile=None):
-        self.fifoFile = fifoFile
+        """ Class constructor, will use the provided file name to creat the FIFO pipe """
+        self.fifoFile = "/tmp/" + fifoFile
         self.fifoHandler = None
         self.thread = None
         self.isRunning = False
@@ -69,6 +73,7 @@ class myFifo(object):
     # Before the garbage collector kicks in, we stop teh thread and log the
     # event.
     def __del__(self):
+        """ This desctuctor method will make sure the threads are alldone before finishing """
         self.__stop()
     # >>> End of __del__
 
@@ -76,6 +81,7 @@ class myFifo(object):
     # This method will log the start of the FIFO process and create the
     # main thread to keep the FIFO running
     def __start(self):
+        """ Initiate the main thread that will ahdnle pushing data into the FIFO pipe """
         myLog.Info("Start the FIFO Thread")
         self.isRunning = True
         self.thread = threading.Thread(target = self.__fifoRunner)
@@ -86,12 +92,14 @@ class myFifo(object):
     ##
     # Change the running flag and wait for the thread to finalize
     def __stop(self):
+        """ Mark the thread as innactive and wait for it to finish all its processing """
         myLog.Info("Stop the FIFO Thread")
         self.isRunning = False
         self.thread.join() ## Block until the thread stop running.
     # >>> End of __stop
 
     def __createFifo(self):
+        """ Open the FIFO pipe in the tmp file system """
         try:
             os.mkfifo(self.fifoFile)
             myLog.Info("Make the file {0} for the fifo".format(self.fifFile))
